@@ -29,6 +29,7 @@ import java.util.List;
 
 public class CarTest {
 
+    public static final Version LUCENE_VERSION = Version.LUCENE_36;
     private static Logger logger = Logger.getLogger(CarTest.class);
 
     private static Car[] testCars = {new Car("Shelby American", "GT 350", (short) 1967, "This is Alex's car!"),
@@ -53,21 +54,38 @@ public class CarTest {
     @Test
     public void testUsingLuceneQueryParserWithProjection() throws Exception {
         FullTextSession fullTestSession = Search.getFullTextSession(hibernateSession);
-        // The second arg - the default field - specifies which
-        // field to search if we don't specify the field in our query
-        QueryParser parser = new QueryParser(Version.LUCENE_36, "model", new StandardAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(LUCENE_VERSION, "model", new StandardAnalyzer(LUCENE_VERSION));
         String searchString = "model:" + "GT 350" + " OR model:" + "Bel Air";
         Query luceneQuery = parser.parse(searchString);
         org.hibernate.search.FullTextQuery fullTextQuery = fullTestSession.createFullTextQuery(luceneQuery);
-        /*
-		 * Setting a projection avoids hitting the database and retrieving data
-		 * not required by your search use case. This can save overhead when you
-		 * only need to return a "read-only" list of items. If no project is
-		 * set, Hibernate Search will fetch all matching Hibernate-managed
-		 * entities from the database.
-		 */
         fullTextQuery.setProjection("id", "model");
-        List<Object[]> searchResults = (List<Object[]>) fullTextQuery.list();
+        List<Object[]> searchResults = fullTextQuery.list();
+
+        boolean foundShelby = false;
+        boolean foundBelAir = false;
+        for (Object[] result : searchResults) {
+            logger.debug("Result found: " + result[0] + ", " + result[1]);
+            if (result[1].equals("GT 350")) {
+                foundShelby = true;
+            } else if (result[1].equals("Bel Air")) {
+                foundBelAir = true;
+            }
+        }
+        Assert.assertEquals(2, searchResults.size());
+        Assert.assertTrue(foundShelby && foundBelAir);
+    }
+
+    @Test(expected = ClassCastException.class)
+    public void testUsingLuceneQueryParserWithoutProjection() throws Exception {
+        FullTextSession fullTestSession = Search.getFullTextSession(hibernateSession);
+        QueryParser parser = new QueryParser(LUCENE_VERSION, "model", new StandardAnalyzer(LUCENE_VERSION));
+        String searchString = "model:" + "GT 350" + " OR model:" + "Bel Air";
+        Query luceneQuery = parser.parse(searchString);
+        org.hibernate.search.FullTextQuery fullTextQuery = fullTestSession.createFullTextQuery(luceneQuery);
+
+//        NOW query.list() will return List<Car>
+//        fullTextQuery.setProjection("id", "model");
+        List<Object[]> searchResults = fullTextQuery.list();
 
         boolean foundShelby = false;
         boolean foundBelAir = false;
@@ -86,21 +104,13 @@ public class CarTest {
     @Test
     public void testUsingLuceneQueryParserWithProjectionIgnoreFieldName() throws Exception {
         FullTextSession fullTestSession = Search.getFullTextSession(hibernateSession);
-        // The second arg - the default field - specifies which
-        // field to search if we don't specify the field in our query
-        QueryParser parser = new QueryParser(Version.LUCENE_36, "model", new StandardAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(LUCENE_VERSION, "model", new StandardAnalyzer(LUCENE_VERSION));
         String searchString = "GT 350 OR Bel Air";
         Query luceneQuery = parser.parse(searchString);
         FullTextQuery fullTextQuery = fullTestSession.createFullTextQuery(luceneQuery);
-		/*
-		 * Setting a projection avoids hitting the database and retrieving data
-		 * not required by your search use case. This can save overhead when you
-		 * only need to return a "read-only" list of items. If no project is
-		 * set, Hibernate Search will fetch all matching Hibernate-managed
-		 * entities from the database.
-		 */
         fullTextQuery.setProjection("id", "model");
-        List<Object[]> searchResults = (List<Object[]>) fullTextQuery.list();
+
+        List<Object[]> searchResults = fullTextQuery.list();
 
         boolean foundShelby = false;
         boolean foundBelAir = false;
@@ -148,7 +158,7 @@ public class CarTest {
         TermQuery belAirTermQuery = new TermQuery(new Term("model", "Bel Air"));
         bq.add(gt350TermQuery, BooleanClause.Occur.SHOULD);
         bq.add(belAirTermQuery, BooleanClause.Occur.SHOULD);
-        Query q = new QueryParser(Version.LUCENE_36, "cs-method", new StandardAnalyzer(Version.LUCENE_36)).parse(bq
+        Query q = new QueryParser(LUCENE_VERSION, "cs-method", new StandardAnalyzer(LUCENE_VERSION)).parse(bq
                 .toString());
 
         org.hibernate.Query hibernateQuery = fullTextSession.createFullTextQuery(q, Car.class);
