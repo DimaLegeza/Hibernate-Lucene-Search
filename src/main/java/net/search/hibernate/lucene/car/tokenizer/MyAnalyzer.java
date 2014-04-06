@@ -1,4 +1,4 @@
-package net.search.hibernate.lucene.tokenizer;
+package net.search.hibernate.lucene.car.tokenizer;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharTokenizer;

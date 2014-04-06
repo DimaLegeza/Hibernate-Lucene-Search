@@ -36,6 +36,7 @@
 
 		<!-- Define Hibernate entity mappings. Standard Hibernate stuff - not specific 
 			to Hibernate Search. -->
-		<mapping class="net.search.hibernate.lucene.Car" />
+		<mapping class="net.search.hibernate.lucene.car.Car" />
+		<mapping class="net.search.hibernate.lucene.human.Human" />
 	</session-factory>
 </hibernate-configuration>

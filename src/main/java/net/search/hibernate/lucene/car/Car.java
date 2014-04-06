@@ -1,6 +1,6 @@
-package net.search.hibernate.lucene;
+package net.search.hibernate.lucene.car;
 
-import net.search.hibernate.lucene.tokenizer.MyAnalyzer;
+import net.search.hibernate.lucene.car.tokenizer.MyAnalyzer;
 import org.hibernate.search.annotations.DocumentId;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;

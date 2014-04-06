@@ -1,5 +1,6 @@
 package net.search.hibernate.lucene;
 
+import net.search.hibernate.lucene.car.Car;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.Term;
