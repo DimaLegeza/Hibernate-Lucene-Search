@@ -19,8 +19,7 @@ import javax.persistence.Id;
         filters = {
                 @TokenFilterDef(factory = SynonymFilterFactory.class, params = {
                         @Parameter(name = "synonyms", value = "net/search/hibernate/lucene/dictionary/synonyms.txt"),
-                        @Parameter(name = "ignoreCase", value = "true"),
-                        @Parameter(name = "expand", value = "false")}
+                        @Parameter(name = "ignoreCase", value = "true")}
                 )
 })
 public class Human {
